@@ -1,7 +1,10 @@
 #ifndef USER_H
 #define USER_H
 #include <iostream>
+#include <iomanip>
 #include <string>
+#include <vector>
+#include "product.h"
 
 /**
  * Implements User functionality and information storage
@@ -16,11 +19,14 @@ public:
     double getBalance() const;
     std::string getName() const;
     void deductAmount(double amt);
-    virtual void dump(std::ostream& os);
+    void dump(std::ostream& os);
+    std::vector<Product*>* getCart();
+    void changeCart(std::vector<Product*>* new_cart);
 
-private:
+protected:
     std::string name_;
     double balance_;
     int type_;
+    std::vector<Product*> cart;
 };
 #endif

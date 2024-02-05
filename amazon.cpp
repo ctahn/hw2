@@ -9,6 +9,7 @@
 #include "db_parser.h"
 #include "product_parser.h"
 #include "util.h"
+#include "mydatastore.h"
 
 using namespace std;
 struct ProdNameSorter {
@@ -29,7 +30,8 @@ int main(int argc, char* argv[])
      * Declare your derived DataStore object here replacing
      *  DataStore type to your derived type
      ****************/
-    DataStore ds;
+     
+    MyDataStore ds;
 
 
 
@@ -64,6 +66,7 @@ int main(int argc, char* argv[])
     vector<Product*> hits;
     bool done = false;
     while(!done) {
+      
         cout << "\nEnter command: " << endl;
         string line;
         getline(cin,line);
@@ -99,9 +102,107 @@ int main(int argc, char* argv[])
                 }
                 done = true;
             }
-	    /* Add support for other commands here */
+	    
+            else if ( cmd == "ADD" ) {
+                
+                string term;
+                vector<string> terms;
+                while(ss >> term) {
+                    term = convToLower(term);
+                    terms.push_back(term);
+                }
+                if(terms.size() < 2){
+                    cout << "Invalid request" << endl;
+                    continue;
+                }
+                std::string username = terms[0];
+                std::string search_hit_number = terms[1];
+                bool found = false;
+                for(std::vector<User*>::iterator it = ds.getUsers()->begin(); it != ds.getUsers()->end(); ++it){
+                    
+                    if(convToLower((*it)->getName()) == username){
+                        found = true;
+                        if(stoul(search_hit_number) > hits.size()){
+                            cout << "Invalid request" << endl;
+                            break;
+                        }
+                        else{
+                            (*it)->getCart()->push_back(hits[stoi(search_hit_number)-1]);
+                            break;
+                        }
+                    }
+                    
+                }
+                if(!found){
+                    cout << "Invalid request" << endl;
+                }
 
-
+            
+            }     
+            else if ( cmd == "VIEWCART" ) {
+                string term;
+                vector<string> terms;
+                while(ss >> term) {
+                    term = convToLower(term);
+                    terms.push_back(term);
+                }
+                string username = terms[0];
+                bool found = false;
+                for(vector<User*>::iterator it = ds.getUsers()->begin(); it != ds.getUsers()->end(); ++it){
+                    if(convToLower((*it)->getName()) == username){
+                        int count = 1;
+                        for(vector<Product*>::iterator two = (*it)->getCart()->begin(); two != (*it)->getCart()->end(); ++two){
+                            cout << "Item " << count << endl;
+                            cout << std::fixed << setprecision(2) << (*two)->displayString() << endl;
+                            count++;
+                            cout << endl;
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found){
+                  cout << "Invalid username" << endl;
+                }
+            }   
+            else if ( cmd == "BUYCART" ) {
+                string term;
+                vector<string> terms;
+                while(ss >> term) {
+                    term = convToLower(term);
+                    terms.push_back(term);
+                }
+                string username = terms[0];
+                bool found = false;
+                
+                for(vector<User*>::iterator it = ds.getUsers()->begin(); it != ds.getUsers()->end(); ++it){
+                    
+                    if(convToLower((*it)->getName()) == username){
+                        int count = 0;
+                        vector<Product*> new_items;
+                        for(vector<Product*>::iterator two = (*it)->getCart()->begin(); two != (*it)->getCart()->end(); ++two){
+                            
+                            if((*two)->getQty() > 0 && (*two)->getPrice() < (*it)->getBalance()){
+                                (*it)->deductAmount((*two)->getPrice());
+                                (*two)->subtractQty(1);
+                            }
+                            else{
+                                new_items.push_back(*two);
+                            }
+                            count++;
+                        }
+                        
+                        
+                        (*it)->changeCart(&new_items);
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found){
+                  cout << "Invalid username" << endl;
+                  
+                }
+            }     
 
 
             else {

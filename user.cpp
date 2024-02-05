@@ -8,7 +8,7 @@ User::User() : name_("unknown"), balance_(0.0), type_(1)
 User::User(std::string name, double balance, int type) :
     name_(name), balance_(balance), type_(type)
 {
-
+  
 }
 
 User::~User()
@@ -34,5 +34,15 @@ void User::deductAmount(double amt)
 
 void User::dump(std::ostream& os)
 {
-    os << name_ << " "  << balance_ << " " << type_ << endl;
+    os   <<  name_ << " " << std::setprecision(2) << std::fixed << balance_ << " " << type_ << endl;
 }
+
+std::vector<Product*>* User::getCart()
+{
+    return &cart;
+}
+
+void User::changeCart(std::vector<Product*>* new_cart)
+{
+    cart = *new_cart;
+};
